@@ -1,50 +1,51 @@
 const User = require('../models/User');
 
-// Controller to get all users
-exports.getAllUsers = async (req, res) => {
-  try {
-    // Fetch all users from the database
-    const users = await User.find();
-    res.json(users);  // Respond with the list of users
-  } catch (err) {
-    // Handle any errors that occur during the process
-    res.status(500).json({ message: 'Error fetching users' });
-  }
-};
+// Controller to create a new user
+exports.createUser = async (req, res) => {
+  const { name, email } = req.body;
 
-// Controller to get a single user by ID
-exports.getUser = async (req, res) => {
-  const { id } = req.params;  // Get the user ID from the request parameters
   try {
-    // Find the user by ID in the database
-    const user = await User.findById(id);
-    if (!user) {
-      // If the user does not exist, return a 404 error
-      return res.status(404).json({ message: 'User not found' });
+    // Check if the user already exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: 'User already exists' });
     }
-    // Return the user data as a response
-    res.json(user);
+
+    // Create the new user
+    const newUser = new User({
+      name,
+      email,
+    });
+
+    // Save the user to the database
+    await newUser.save();
+
+    // Return the newly created user
+    res.status(201).json(newUser);
   } catch (err) {
-    // Handle any errors that occur during the process
-    res.status(500).json({ message: 'Error fetching user' });
+    // Handle any errors
+    res.status(500).json({ message: 'Error creating user', error: err });
   }
 };
 
-// Controller to update user details
+// Controller to update user by ID
 exports.updateUser = async (req, res) => {
   const { id } = req.params;  // Get the user ID from the request parameters
-  const { name, email } = req.body;  // Extract name and email from the request body
+  const { name, email } = req.body;  // Extract the updated user data from the request body
 
   try {
-    // Update user data in the database
+    // Find the user by ID and update their data
     const updatedUser = await User.findByIdAndUpdate(id, { name, email }, { new: true });
+
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
-    // Respond with the updated user data
+
+    // Return the updated user
     res.json(updatedUser);
   } catch (err) {
-    res.status(500).json({ message: 'Error updating user' });
+    // Handle any errors
+    res.status(500).json({ message: 'Error updating user', error: err });
   }
 };
 
@@ -53,14 +54,16 @@ exports.deleteUser = async (req, res) => {
   const { id } = req.params;  // Get the user ID from the request parameters
 
   try {
-    // Delete the user from the database
+    // Find and delete the user by ID
     const deletedUser = await User.findByIdAndDelete(id);
     if (!deletedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
-    // Respond with a success message
+
+    // Return a success message
     res.json({ message: 'User deleted successfully' });
   } catch (err) {
-    res.status(500).json({ message: 'Error deleting user' });
+    // Handle any errors that occur during the process
+    res.status(500).json({ message: 'Error deleting user', error: err });
   }
 };
