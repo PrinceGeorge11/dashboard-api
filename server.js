@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');  // Import swagger-ui-express
-const swaggerDocument = require('./swagger.json');  // Import the Swagger configuration
+const swaggerDocument = require('./src/swagger.json');  // Import the Swagger configuration
 
 // Import route files
 const userRoutes = require('./src/routes/userRoutes');
